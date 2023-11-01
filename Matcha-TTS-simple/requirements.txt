@@ -1,0 +1,14 @@
+torch
+torchaudio
+phonemizer      # phonemization of text
+tensorboard
+librosa
+Cython
+numpy
+einops
+inflect
+Unidecode
+scipy
+matplotlib
+conformer       # 0.3.2
+diffusers       # 0.21.3

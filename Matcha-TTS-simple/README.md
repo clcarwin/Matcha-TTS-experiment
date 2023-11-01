@@ -1,4 +1,6 @@
 # Matcha-TTS-simple
+Do not dependent to lightning/hydra/rootutils/rich/gdown/wget
+
 
 ## build
 ```bash
