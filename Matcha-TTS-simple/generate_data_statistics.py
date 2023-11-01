@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 from tqdm.auto import tqdm
 from matcha.data.text_mel_datamodule import TextMelDataModule
+from matcha.utils.utils import dict_to_attrdic
 
 
 def compute_data_statistics(data_loader: torch.utils.data.DataLoader, out_channels: int):
@@ -34,34 +35,21 @@ def compute_data_statistics(data_loader: torch.utils.data.DataLoader, out_channe
     return {"mel_mean": data_mean.item(), "mel_std": data_std.item()}
 
 
-data_param = {
-    "name": "ljspeech",
-    "train_filelist_path": "assets/filelists/ljs_audio_text_train_filelist.txt",
-    "valid_filelist_path": "assets/filelists/ljs_audio_text_val_filelist.txt",
-    "batch_size": 32,
-    "num_workers": 20,
-    "pin_memory": True,
-    "cleaners": ["english_cleaners2"],
-    "add_blank": True,
-    "n_spks": 1,
-    "n_fft": 1024,
-    "n_feats": 80,
-    "sample_rate": 22050,
-    "hop_length": 256,
-    "win_length": 1024,
-    "f_min": 0,
-    "f_max": 8000,
-    "data_statistics":  # Computed for ljspeech dataset
-    {"mel_mean": -5.536622,
-    "mel_std": 2.116101},
-    "seed": 42
-}
+
 
 def main():
+    parser = argparse.ArgumentParser(description='NS2VC v2')
+    parser.add_argument('--config', required=True, type=str, help='configs/xxx.json')
+    args = parser.parse_args()
+
+    cfg = json.load(open(args.config))
+    cfg = dict_to_attrdic(cfg)
+
+    data_param = cfg.data_param
     data_param['batch_size'] = 256
     data_param['data_statistics'] = None
     data_param["seed"] = 1234
-    
+
     print('Start')
     text_mel_datamodule = TextMelDataModule(**data_param)
     data_loader = text_mel_datamodule.train_dataloader()

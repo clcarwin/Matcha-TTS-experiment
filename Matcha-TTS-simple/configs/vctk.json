@@ -1,0 +1,65 @@
+{
+    "data_param":{
+        "name": "ljspeech",
+        "train_filelist_path": "assets/filelists/vctk_audio_sid_text_train_filelist.txt",
+        "valid_filelist_path": "assets/filelists/vctk_audio_sid_text_val_filelist.txt",
+        "batch_size": 32,
+        "num_workers": 20,
+        "pin_memory": true,
+        "cleaners": ["english_cleaners2"],
+        "add_blank": true,
+        "n_spks": 110,
+        "n_fft": 1024,
+        "n_feats": 80,
+        "sample_rate": 22050,
+        "hop_length": 256,
+        "win_length": 1024,
+        "f_min": 0,
+        "f_max": 8000,
+        "data_statistics": {"mel_mean": -7.235720,"mel_std": 2.598969},
+        "seed": 42
+    },
+    "model_param":{
+        "n_vocab":178,
+        "n_spks":110,
+        "spk_emb_dim":64,
+        "n_feats":80,
+        "encoder":{
+            "encoder_type": "RoPE Encoder",
+            "encoder_params":{
+                "n_feats": 80,
+                "n_channels": 192,
+                "filter_channels": 768,
+                "filter_channels_dp": 256,
+                "n_heads": 2,
+                "n_layers": 6,
+                "kernel_size": 3,
+                "p_dropout": 0.1,
+                "spk_emb_dim": 64,
+                "n_spks": 110,
+                "prenet": true
+            },
+            "duration_predictor_params": {
+                "filter_channels_dp": 256,
+                "kernel_size": 3,
+                "p_dropout": 0.1
+            }
+        },
+        "decoder":{
+            "channels": [256, 256],
+            "dropout": 0.05,
+            "attention_head_dim": 64,
+            "n_blocks": 1,
+            "num_mid_blocks": 2,
+            "num_heads": 2,
+            "act_fn": "snakebeta"
+        },
+        "cfm":{
+            "name": "CFM",
+            "solver": "euler",
+            "sigma_min": 1e-4
+        },
+        "data_statistics": {"mel_mean": -7.235720,"mel_std": 2.598969},
+        "out_size":null
+    }
+}

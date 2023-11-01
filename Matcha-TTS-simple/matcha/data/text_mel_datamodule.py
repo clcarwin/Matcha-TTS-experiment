@@ -3,17 +3,15 @@ from typing import Any, Dict, Optional
 
 import torch
 import torchaudio as ta
+import torchaudio.transforms as T
 from torch.utils.data.dataloader import DataLoader
 
 from matcha.text import text_to_sequence
 from matcha.utils.audio import mel_spectrogram
 from matcha.utils.model import fix_len_compatibility, normalize
 from matcha.utils.utils import intersperse
+from matcha.utils.utils import dict_to_attrdic
 
-class AttrDict(dict):
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
 
 def parse_filelist(filelist_path, split_char="|"):
     with open(filelist_path, encoding="utf-8") as f:
@@ -45,7 +43,7 @@ class TextMelDataModule():
     ):
         super().__init__()
 
-        self.hparams = AttrDict({
+        self.hparams = {
             "name":name,
             "train_filelist_path":train_filelist_path,
             "valid_filelist_path":valid_filelist_path,
@@ -64,7 +62,8 @@ class TextMelDataModule():
             "f_max":f_max,
             "data_statistics":data_statistics,
             "seed":seed
-        })
+        }
+        self.hparams = dict_to_attrdic(self.hparams)
 
         self.trainset = TextMelDataset(  # pylint: disable=attribute-defined-outside-init
             self.hparams.train_filelist_path,
@@ -172,7 +171,12 @@ class TextMelDataset(torch.utils.data.Dataset):
 
     def get_mel(self, filepath):
         audio, sr = ta.load(filepath)
-        assert sr == self.sample_rate
+        # assert sr == self.sample_rate
+        if audio.shape[0]>1: audio = audio[0:1,:] # stereo to mono
+        if sr != self.sample_rate:
+            audio = T.Resample(sr, self.sample_rate)(audio)
+        audio = audio.clip(-1,1)
+
         mel = mel_spectrogram(
             audio,
             self.n_fft,
