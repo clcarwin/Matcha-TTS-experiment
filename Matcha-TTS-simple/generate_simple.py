@@ -16,7 +16,7 @@ from matcha.hifigan.models import Generator as HiFiGAN
 from matcha.models.matcha_tts import MatchaTTS
 from matcha.text import sequence_to_text, text_to_sequence
 from matcha.utils.model import denormalize
-from matcha.utils.utils import get_user_data_dir, intersperse
+from matcha.utils.utils import intersperse
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
