@@ -20,7 +20,7 @@ from matcha.utils.utils import get_user_data_dir, intersperse
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MATCHA_CHECKPOINT = "logs/simple/model_00020000.pt"
+MATCHA_CHECKPOINT = "checkpoints/model_00150000.pt"
 HIFIGAN_CHECKPOINT = "checkpoints/hifigan_T2_v1"
 OUTPUT_FOLDER = "logs/simple"
 

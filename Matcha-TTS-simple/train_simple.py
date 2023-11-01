@@ -94,7 +94,6 @@ if __name__ == '__main__':
 
     print(TextMelDataModule)
     TextMelData = TextMelDataModule(**data_param)
-    TextMelData.setup()
 
     dataloader = TextMelData.train_dataloader()
     # print(dataloader)

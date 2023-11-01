@@ -5,8 +5,6 @@ import random
 import torch
 
 import matcha.utils.monotonic_align as monotonic_align
-from matcha import utils
-from matcha.models.baselightningmodule import BaseLightningClass
 from matcha.models.components.flow_matching import CFM
 from matcha.models.components.text_encoder import TextEncoder
 from matcha.utils.model import (
@@ -17,10 +15,7 @@ from matcha.utils.model import (
     sequence_mask,
 )
 
-log = utils.get_pylogger(__name__)
-
-
-class MatchaTTS(BaseLightningClass):  # 🍵
+class MatchaTTS(torch.nn.Module):  # 🍵
     def __init__(
         self,
         n_vocab,
@@ -36,8 +31,6 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         scheduler=None,
     ):
         super().__init__()
-
-        self.save_hyperparameters(logger=False)
 
         self.n_vocab = n_vocab
         self.n_spks = n_spks
@@ -66,7 +59,8 @@ class MatchaTTS(BaseLightningClass):  # 🍵
             spk_emb_dim=spk_emb_dim,
         )
 
-        self.update_data_statistics(data_statistics)
+        self.register_buffer("mel_mean", torch.tensor(data_statistics["mel_mean"]))
+        self.register_buffer("mel_std", torch.tensor(data_statistics["mel_std"]))
 
     @torch.inference_mode()
     def synthesise(self, x, x_lengths, n_timesteps, temperature=1.0, spks=None, length_scale=1.0):

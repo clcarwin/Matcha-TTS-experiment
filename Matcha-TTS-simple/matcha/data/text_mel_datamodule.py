@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 import torch
 import torchaudio as ta
-from lightning import LightningDataModule
 from torch.utils.data.dataloader import DataLoader
 
 from matcha.text import text_to_sequence
@@ -11,6 +10,10 @@ from matcha.utils.audio import mel_spectrogram
 from matcha.utils.model import fix_len_compatibility, normalize
 from matcha.utils.utils import intersperse
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 def parse_filelist(filelist_path, split_char="|"):
     with open(filelist_path, encoding="utf-8") as f:
@@ -18,7 +21,7 @@ def parse_filelist(filelist_path, split_char="|"):
     return filepaths_and_text
 
 
-class TextMelDataModule(LightningDataModule):
+class TextMelDataModule():
     def __init__(  # pylint: disable=unused-argument
         self,
         name,
@@ -42,17 +45,26 @@ class TextMelDataModule(LightningDataModule):
     ):
         super().__init__()
 
-        # this line allows to access init params with 'self.hparams' attribute
-        # also ensures init params will be stored in ckpt
-        self.save_hyperparameters(logger=False)
-
-    def setup(self, stage: Optional[str] = None):  # pylint: disable=unused-argument
-        """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
-
-        This method is called by lightning with both `trainer.fit()` and `trainer.test()`, so be
-        careful not to execute things like random split twice!
-        """
-        # load and split datasets only if not loaded already
+        self.hparams = AttrDict({
+            "name":name,
+            "train_filelist_path":train_filelist_path,
+            "valid_filelist_path":valid_filelist_path,
+            "batch_size":batch_size,
+            "num_workers":num_workers,
+            "pin_memory":pin_memory,
+            "cleaners":cleaners,
+            "add_blank":add_blank,
+            "n_spks":n_spks,
+            "n_fft":n_fft,
+            "n_feats":n_feats,
+            "sample_rate":sample_rate,
+            "hop_length":hop_length,
+            "win_length":win_length,
+            "f_min":f_min,
+            "f_max":f_max,
+            "data_statistics":data_statistics,
+            "seed":seed
+        })
 
         self.trainset = TextMelDataset(  # pylint: disable=attribute-defined-outside-init
             self.hparams.train_filelist_path,
@@ -105,17 +117,6 @@ class TextMelDataModule(LightningDataModule):
             collate_fn=TextMelBatchCollate(self.hparams.n_spks),
         )
 
-    def teardown(self, stage: Optional[str] = None):
-        """Clean up after fit or test."""
-        pass  # pylint: disable=unnecessary-pass
-
-    def state_dict(self):  # pylint: disable=no-self-use
-        """Extra things to save to checkpoint."""
-        return {}
-
-    def load_state_dict(self, state_dict: Dict[str, Any]):
-        """Things to do when loading checkpoint."""
-        pass  # pylint: disable=unnecessary-pass
 
 
 class TextMelDataset(torch.utils.data.Dataset):
